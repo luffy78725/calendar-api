@@ -1,0 +1,29 @@
+ 1. api list :
+	- Meetings
+	- Tasks
+
+
+  - common fields : event_start_time, event_end_time, event_name, event_type, repeat, reminder, event_description
+  - meetings : participants, location
+
+
+
+  - CRUD for events
+  - api/v1/add_event - POST 
+  - api/v1/edit_event/1 - PUT
+  - api/v1/delete_event/1 - DELETE
+  - api/v1/get_events?type="{event_type}" - GET
+ 
+import mongoose from "mongoose";
+
+let connectMDB = null;
+
+const connectMongo = async () => {
+  if (connectMDB) return connectMDB;
+  return mongoose.connect(process.env.MONGODB_URI + "/task-planner");
+};
+
+export default connectMongo;
+
+
+MONGODB_URI=mongodb://localhost:27017
