@@ -1,10 +1,41 @@
-const { Reminders, Meetings } = require("../models");
+const { Meetings } = require("../models");
 
 const getAllMeetings = async (req, res) => {
-  const meetings = await Meetings.find({});
+  const { startDate, endDate, perPageCount = 10, page = 1 } = req.query;
+  const query = {};
+  const pipeline = [];
+
+  if (startDate) {
+    query.startDateTime = { $gte: startDate };
+  }
+
+  if (startDate && endDate) {
+    query.startDateTime = { ...query.startDateTime, $lte: endDate };
+  }
+
+  pipeline.push(
+    {
+      $match: query,
+    },
+    {
+      $skip: (Number(page) - 1) * Number(perPageCount),
+    },
+    {
+      $limit: Number(perPageCount),
+    }
+  );
+
+  const total = await Meetings.countDocuments();
+
+  const meetings = await Meetings.aggregate(pipeline).exec();
 
   res.status(200).json({
     data: meetings,
+    pagination: {
+      page,
+      perPageCount,
+      total,
+    },
     message: "Data fetched successfully",
   });
 };
