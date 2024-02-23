@@ -1,6 +1,8 @@
 const schedule = require("node-schedule");
+const WebSocket = require("ws");
 const { Meetings } = require("./models");
-const INTERVAL = 2 * 60 * 1000;
+const INTERVAL = 5 * 60 * 1000;
+let WebSocketServer = null;
 
 const dayOfWeek = {
   Mon: 0,
@@ -13,9 +15,14 @@ const dayOfWeek = {
 };
 
 function sendMeetingReminder(meeting) {
-  console.log(
-    `Meeting reminder for ${meeting.title}: Your meeting is in ${meeting.remindBefore} minutes!`
-  );
+  const message = `Meeting reminder for ${meeting.title}: Your meeting is in ${meeting.remindBefore} minutes!`;
+  WebSocketServer.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      console.log("inside foreach");
+      client.send(message);
+    }
+  });
+  console.log(message);
 }
 
 async function scheduleReminderForMeetings() {
@@ -59,9 +66,10 @@ async function scheduleReminderForMeetings() {
   });
 }
 
-async function meetingScheduler() {
+async function meetingScheduler(wss) {
+  WebSocketServer = wss;
   console.log("scheduling meetings...");
-  setTimeout(scheduleReminderForMeetings, 0);
+  setInterval(scheduleReminderForMeetings, INTERVAL);
 
   console.log("Initial job scheduled at:", new Date());
 }
