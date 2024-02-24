@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const WebSocket = require("ws");
 const http = require("http");
+const cors = require("cors");
 const eventsRouter = require("./routes");
 const connectDB = require("./connect");
 const errorHandlerMiddleware = require("./middlewares/error-handler");
@@ -35,6 +36,8 @@ wss.on("connection", (ws) => {
 const PORT = 8000;
 
 app.use(express.json());
+
+app.use(cors());
 
 app.use("/api/v1", eventsRouter);
 
